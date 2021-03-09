@@ -9,13 +9,53 @@ import ToyContainer from './components/ToyContainer'
 class App extends React.Component{
 
   state = {
-    display: false
+    display: false,
+    toys: []
+  }
+
+  componentDidMount(){
+    fetch('http://localhost:3000/toys')
+    .then(resp => resp.json())
+    .then(toys => {
+      this.setState({
+        toys: toys
+      })
+    })
   }
 
   handleClick = () => {
-    let newBoolean = !this.state.display
+    const newBoolean = !this.state.display
     this.setState({
       display: newBoolean
+    })
+  }
+
+  addToy = (newToy) => {
+    this.setState({
+      toys: [...this.state.toys, newToy]
+    })
+  }
+
+  updateToy= (updatedToy) => {
+    const updatedToys = this.state.toys.map(toyObj => {
+      if (toyObj.id === updatedToy.id) {
+        return updatedToy
+      } else {
+        return toyObj
+      }
+    })
+
+    this.setState({
+      toys: updatedToys
+    })
+  }
+
+  deleteToy = (id) => {
+
+    const updatedToys = this.state.toys.filter(t => t.id !== id)
+
+    this.setState({
+      toys: updatedToys
     })
   }
 
@@ -23,16 +63,11 @@ class App extends React.Component{
     return (
       <>
         <Header/>
-        { this.state.display
-            ?
-          <ToyForm/>
-            :
-          null
-        }
+        { this.state.display ? <ToyForm addToy={this.addToy}/> : null }
         <div className="buttonContainer">
           <button onClick={this.handleClick}> Add a Toy </button>
         </div>
-        <ToyContainer/>
+        <ToyContainer toys={this.state.toys} updateToy={this.updateToy} deleteToy={this.deleteToy}/>
       </>
     );
   }
